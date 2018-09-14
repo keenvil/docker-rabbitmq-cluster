@@ -1,4 +1,4 @@
-version: '3'
+version: '3.6'
 
 services:
 
@@ -6,10 +6,23 @@ services:
     image: rabbitmq:3-management
     hostname: rabbitmq1
     environment:
+      - LOGSPOUT=ignore
       - RABBITMQ_ERLANG_COOKIE=${RABBITMQ_ERLANG_COOKIE}
       - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
       - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
       - RABBITMQ_DEFAULT_VHOST=${RABBITMQ_DEFAULT_VHOST}
+    networks:
+      - rabbitmq
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+      resources:
+        limits:
+          memory: 1024M
+        reservations:
+          memory: 512M
 
   rabbitmq2:
     image: rabbitmq:3-management
@@ -17,10 +30,25 @@ services:
     depends_on:
       - rabbitmq1
     environment:
+      - LOGSPOUT=ignore
       - RABBITMQ_ERLANG_COOKIE=${RABBITMQ_ERLANG_COOKIE}
-    volumes:
-      - ./cluster-entrypoint.sh:/usr/local/bin/cluster-entrypoint.sh
+    secrets:
+      - source: cluster-entrypoint.sh
+        target: /usr/local/bin/cluster-entrypoint.sh
+        mode: 0755
     entrypoint: /usr/local/bin/cluster-entrypoint.sh
+    networks:
+      - rabbitmq
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+      resources:
+        limits:
+          memory: 1024M
+        reservations:
+          memory: 512M
 
   rabbitmq3:
     image: rabbitmq:3-management
@@ -28,19 +56,59 @@ services:
     depends_on:
       - rabbitmq1
     environment:
+      - LOGSPOUT=ignore
       - RABBITMQ_ERLANG_COOKIE=${RABBITMQ_ERLANG_COOKIE}
-    volumes:
-      - ./cluster-entrypoint.sh:/usr/local/bin/cluster-entrypoint.sh
+    secrets:
+      - source: cluster-entrypoint.sh
+        target: /usr/local/bin/cluster-entrypoint.sh
+        mode: 0755
     entrypoint: /usr/local/bin/cluster-entrypoint.sh
-    
+    networks:
+      - rabbitmq
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+      resources:
+        limits:
+          memory: 1024M
+        reservations:
+          memory: 512M
+
   haproxy:
     image: haproxy:1.7
-    volumes:
-      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    environment:
+      - LOGSPOUT=ignore
+    secrets:
+      - source: haproxy.cfg
+        target: /usr/local/etc/haproxy/haproxy.cfg
+        mode: 0644
     depends_on:
       - rabbitmq1
       - rabbitmq2
       - rabbitmq3
     ports:
-      - 15672:15672
-      - 5672:5672
+      - 15673:15672
+      - 5673:5672
+    networks:
+      - rabbitmq
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
+secrets:
+  haproxy.cfg:
+    file: ./haproxy.cfg
+  cluster-entrypoint.sh:
+    file: ./cluster-entrypoint.sh
+
+networks:
+  rabbitmq:
