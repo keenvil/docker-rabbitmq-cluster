@@ -9,7 +9,7 @@ The main benifit with this approach is that you can use [any version](https://hu
 ```
 > git clone https://github.com/pablolibo/docker-rabbitmq-cluster.git
 > cd docker-rabbitmq-cluster
-> docker-compose up
+> env $(cat .env) docker stack deploy -c docker-compose.yml rabbitmq
 ```
 
 Most things will be how you expect:
