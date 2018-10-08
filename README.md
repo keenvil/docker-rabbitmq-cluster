@@ -1,4 +1,4 @@
-# Cluster RabbitMQ :rabbit:
+# Cluster RabbitMQ for Docker Swarm :rabbit:
 
 There are a lots of good options if you want to run a [RabbitMQ](https://hub.docker.com/_/rabbitmq/) cluster in [docker](http://docker.com/). Here's an solution that only rely on [docker official images](https://hub.docker.com/_/rabbitmq/) :tada:
 
@@ -9,7 +9,7 @@ The main benifit with this approach is that you can use [any version](https://hu
 ```
 > git clone https://github.com/pablolibo/docker-rabbitmq-cluster.git
 > cd docker-rabbitmq-cluster
-> docker-compose up
+> env $(cat .env) docker stack deploy -c docker-compose.yml rabbitmq
 ```
 
 Most things will be how you expect:
