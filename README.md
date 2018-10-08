@@ -18,6 +18,15 @@ Most things will be how you expect:
 * The broker accepts connections on `localhost:5672`
 * The Management interface is found at `localhost:15672`
 
+## Example .env
+
+```
+RABBITMQ_ERLANG_COOKIE=12345
+RABBITMQ_DEFAULT_USER=guest
+RABBITMQ_DEFAULT_PASS=guest
+RABBITMQ_DEFAULT_VHOST=/
+```
+
 ## Customize
 
 The `.env` file contains environment variables that can be used to change the default username, password and virtual host.
